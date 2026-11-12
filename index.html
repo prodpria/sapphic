@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Pa11av Music</title>
+    <meta name="description" content="Pa11av — new music and the new hat and bandana merch drop.">
+    <meta name="theme-color" content="#000000">
+    <meta property="og:title" content="Pa11av Music">
+    <meta property="og:description" content="New hat and bandana merch — out now.">
+    <meta property="og:image" content="assets/merch_reel_poster.jpg">
+    <meta property="og:type" content="website">
+    <link rel="icon" type="image/png" href="assets/pallav_logo.png">
+    <link rel="apple-touch-icon" href="assets/pallav_logo.png">
+    <link rel="preload" as="image" href="assets/merch_reel_poster.jpg">
+
+    <style>
+        :root {
+            --accent: #e4e4e4; /* grey-white for text & button outlines */
+            --line: rgba(255, 255, 255, 0.3);
+            --hover: rgba(255, 255, 255, 0.2);
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            background-color: #000;
+            color: #fff;
+            font-family: sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            min-height: 100svh;
+        }
+
+        .background-video {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -1;
+        }
+
+        .landing-container {
+            text-align: center;
+            width: 100%;
+            padding: 82px 20px calc(140px + env(safe-area-inset-bottom, 0px));
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 22px;
+        }
+
+        /* ---------- Top nav ---------- */
+        .nav-bar {
+            position: fixed;
+            top: calc(27px + env(safe-area-inset-top, 0px));
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            z-index: 2;
+            padding: 0 33px;
+        }
+
+        .shop-btn, .listen-btn {
+            display: inline-block;
+            background-color: black;
+            border: 1px solid var(--line);
+            color: var(--accent);
+            padding: 7px 9px;
+            font-size: 15px;
+            font-family: sans-serif;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background-color 0.3s, color 0.3s;
+            border-radius: 9px;
+        }
+
+        .shop-btn:hover, .listen-btn:hover {
+            background-color: var(--hover);
+            color: #fff;
+        }
+
+        :focus-visible {
+            outline: 2px solid var(--accent);
+            outline-offset: 3px;
+        }
+
+        /* ---------- Song player ---------- */
+        .audio-preview {
+            background-color: black;
+            border: 1px solid var(--line);
+            color: var(--accent);
+            border-radius: 9px;
+            padding: 9px 10px 6px;
+            width: min(100%, 340px);
+            font-size: 15px;
+        }
+
+        .audio-preview audio {
+            display: block;
+            width: 100%;
+            margin-top: 8px;
+        }
+
+        /* ---------- Merch reel ---------- */
+        .reel {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+            width: 100%;
+        }
+
+        .reel-frame {
+            position: relative;
+            /* Size the 9:16 reel so the video AND the shop button fit
+               on screen above the logo button (390px = everything else) */
+            width: min(100%, 420px, max(200px, calc((100vh - 390px) * 698 / 1246)));
+            width: min(100%, 420px, max(200px, calc((100svh - 390px) * 698 / 1246)));
+            aspect-ratio: 698 / 1246;
+            border-radius: 18px;
+            overflow: hidden;
+            background: #000;
+            border: 1px solid var(--line);
+        }
+
+        .reel-frame video {
+            display: block;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            cursor: pointer;
+        }
+
+        .sound-btn {
+            position: absolute;
+            right: 10px;
+            bottom: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            border: 1px solid var(--line);
+            color: #fff;
+            font-size: 13px;
+            font-family: sans-serif;
+            padding: 6px 10px;
+            border-radius: 20px;
+            cursor: pointer;
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+        }
+
+        .sound-btn:hover { background: rgba(255, 255, 255, 0.2); }
+
+        .reel-shop-btn {
+            font-size: 17px;
+            padding: 12px 26px;
+            border-radius: 30px;
+            border-color: var(--accent);
+            letter-spacing: 0.04em;
+        }
+
+        .reel-shop-btn:hover {
+            background-color: var(--accent);
+            color: #000;
+        }
+
+        /* ---------- Logo / menu toggle ---------- */
+        .logo {
+            position: fixed;
+            bottom: calc(33px + env(safe-area-inset-bottom, 0px));
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 80px;
+            border: 0.9px solid var(--line);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            background-color: black;
+            color: #fff;
+            font-size: 24px;
+            padding: 0;
+        }
+
+        .logo {
+            z-index: 100;
+            animation: inflate 0.6s ease-out forwards;
+        }
+
+
+        @keyframes inflate {
+            from { transform: translateX(-50%) scale(0.5); opacity: 0; }
+            to   { transform: translateX(-50%) scale(1);   opacity: 1; }
+        }
+
+        .logo img { width: 68px; transition: transform 0.3s; }
+        .logo.active { background-color: transparent; border-color: #fff; }
+        .logo.active img { display: none; }
+        .logo.active::after { content: "X"; }
+        .logo:hover { background-color: rgba(255, 255, 255, 0.1); }
+        .logo:hover img { transform: scale(0.8); }
+
+        /* ---------- Overlays ---------- */
+        .menu-overlay, .about-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            pointer-events: none;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.5s ease, visibility 0s linear 0.5s;
+        }
+
+        .menu-overlay.show, .about-overlay.show {
+            pointer-events: auto;
+            opacity: 1;
+            visibility: visible;
+            transition: opacity 0.5s ease, visibility 0s;
+        }
+
+        .menu-overlay { z-index: 4; justify-content: flex-start; padding-top: 30px; }
+        .about-overlay { z-index: 5; justify-content: center; padding: 20px; }
+
+        .menu-content {
+            text-align: center;
+            width: 100%;
+            height: calc(100% - 220px);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            align-items: center;
+        }
+
+        .menu-logo { width: min(400px, 85vw); cursor: pointer; }
+
+        .menu-content ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex-grow: 1;
+            gap: 33px;
+        }
+
+        .menu-content ul li {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+        }
+        .menu-content ul li:nth-child(2) { transition-delay: 0.1s; }
+
+        .menu-overlay.show .menu-content ul li { opacity: 1; transform: translateY(0); }
+
+        .menu-content ul li a {
+            display: block;
+            color: #fff;
+            text-decoration: none;
+            font-size: 18px;
+            padding: 9px 93px;
+            border-radius: 30px;
+            border: 1px solid var(--line);
+            transition: background-color 0.3s;
+        }
+        .menu-content ul li a:hover { background: var(--hover); }
+
+        .about-content {
+            text-align: center;
+            font-size: 18px;
+            max-width: 300px;
+        }
+
+        .about-close-btn {
+            position: absolute;
+            top: calc(20px + env(safe-area-inset-top, 0px));
+            left: 20px;
+            background: transparent;
+            border: 0.5px solid #fff;
+            color: #fff;
+            font-size: 14px;
+            padding: 9px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            border-radius: 30px;
+            font-family: sans-serif;
+        }
+        .about-close-btn:hover { background-color: var(--hover); }
+
+        @media (max-width: 600px) {
+            body { font-size: 14px; }
+            .landing-container { padding-top: 74px; gap: 18px; }
+            .logo { width: 70px; height: 70px; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); }
+            .logo img { width: 56px; }
+            .nav-bar { padding: 0 18px; }
+            .shop-btn, .listen-btn { padding: 5px 7px; font-size: 13px; }
+            .reel-shop-btn { font-size: 15px; padding: 11px 22px; }
+            .menu-content ul li a { font-size: 16px; padding: 9px 60px; }
+            .about-content { font-size: 16px; padding: 10px; }
+            .about-close-btn { font-size: 12px; padding: 7px; }
+        }
+
+        /* Desktop: tuck the song player into the top bar so the reel gets more room */
+        @media (min-width: 900px) and (min-height: 600px) {
+            .audio-preview {
+                position: fixed;
+                top: calc(18px + env(safe-area-inset-top, 0px));
+                left: 50%;
+                transform: translateX(-50%);
+                z-index: 3;
+            }
+            .landing-container { padding-top: 134px; }
+            .reel-frame {
+                width: min(100%, 460px, max(200px, calc((100vh - 322px) * 698 / 1246)));
+                width: min(100%, 460px, max(200px, calc((100svh - 322px) * 698 / 1246)));
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation: none !important; transition: none !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <img src="assets/pallav.gif" class="background-video" alt="" onerror="this.remove()">
+
+    <div class="landing-container">
+        <nav class="nav-bar">
+            <a class="listen-btn" href="https://linktr.ee/Pa11av_">LISTEN</a>
+            <a class="shop-btn js-shop-link" href="#">SHOP</a>
+        </nav>
+
+        <div class="audio-preview">
+            you are not alone.
+            <audio id="backgroundMusic" controls preload="auto">
+                <source src="assets/yournotalonew.mp3" type="audio/mpeg">
+            </audio>
+        </div>
+
+        <section class="reel" aria-label="New hat and bandana merch">
+            <div class="reel-frame">
+                <video id="merchReel"
+                       src="assets/merch_reel.mp4"
+                       poster="assets/merch_reel_poster.jpg"
+                       loop playsinline preload="auto"
+                       aria-label="Merch reel: new hats and bandanas"></video>
+                <button class="sound-btn" id="soundBtn" type="button" aria-pressed="false">Sound on</button>
+            </div>
+            <a class="shop-btn reel-shop-btn js-shop-link" href="#">SHOP HATS &amp; BANDANAS</a>
+        </section>
+
+        <button class="logo" id="menu-toggle" type="button" onclick="toggleMenu()" aria-label="Open menu">
+            <img src="assets/pallav_logo.png" alt="">
+        </button>
+    </div>
+
+    <div class="menu-overlay" id="menu-overlay">
+        <div class="menu-content">
+            <img src="assets/pallav_logo2.png" alt="Pa11av" class="menu-logo" onclick="toggleMenu()">
+            <ul>
+                <li><a href="#" onclick="showAbout(); return false;">ABOUT ME</a></li>
+                <li><a href="mailto:pa11av.g03@gmail.com">CONTACT</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="about-overlay" id="about-overlay">
+        <div class="about-content">
+            <img src="assets/pallav_logo.png" alt="Pa11av" style="width: 100px; margin-bottom: 20px;" onclick="hideAbout()">
+            <p>bio.</p>
+        </div>
+        <button class="about-close-btn" type="button" onclick="hideAbout()">← RETURN</button>
+    </div>
+
+    <script>
+        // ===== Paste the Shopify store link here (updates both SHOP buttons) =====
+        const SHOP_URL = "https://sapphic-2.myshopify.com";
+
+        document.querySelectorAll(".js-shop-link").forEach(a => { a.href = SHOP_URL; });
+
+        const song  = document.getElementById("backgroundMusic");
+        const reel  = document.getElementById("merchReel");
+        const sound = document.getElementById("soundBtn");
+        const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+        // Reel: SOUND ON by default.
+        // Browsers (Chrome, Safari, iPhone) block video sound until the visitor
+        // taps or clicks once. So we try to play with sound right away; if the
+        // browser says no, the reel plays silently and the sound switches on
+        // (from the start of the ad) with the visitor's first tap anywhere.
+        song.volume = 0.7;
+        let started = false;
+
+        function setReelSound(on, restart) {
+            reel.muted = !on;
+            sound.textContent = on ? "Sound off" : "Sound on";
+            sound.setAttribute("aria-pressed", String(on));
+            if (on) {
+                song.pause();                      // never two tracks at once
+                if (restart) reel.currentTime = 0;
+                reel.play().catch(() => {});
+            }
+        }
+
+        function unlockSound(e) {
+            ["click", "touchend", "keydown"].forEach(t => document.removeEventListener(t, unlockSound, true));
+            // The song player, sound button and video handle their own taps
+            if (e.target.closest && e.target.closest(".audio-preview, .sound-btn, #merchReel")) return;
+            if (reel.muted) setReelSound(true, true);
+        }
+
+        function startReel() {
+            started = true;
+            reel.muted = false;
+            reel.play().then(() => setReelSound(true, false)).catch(() => {
+                setReelSound(false);
+                reel.play().catch(() => {});
+                ["click", "touchend", "keydown"].forEach(t => document.addEventListener(t, unlockSound, true));
+            });
+        }
+
+        if (!reduceMotion) startReel();
+
+        // Pause the reel when it's scrolled off screen, resume when it's back
+        if ("IntersectionObserver" in window) {
+            new IntersectionObserver(([entry]) => {
+                if (!started) return;
+                if (entry.isIntersecting) reel.play().catch(() => {});
+                else reel.pause();
+            }, { threshold: 0.4 }).observe(reel);
+        }
+
+        sound.addEventListener("click", () => setReelSound(reel.muted, reel.muted));
+        reel.addEventListener("click", () => {
+            started = true;
+            if (reel.paused) setReelSound(true, false);
+            else setReelSound(reel.muted, reel.muted);
+        });
+
+        // If the visitor starts the song, mute the reel
+        song.addEventListener("play", () => { if (!reel.muted) setReelSound(false); });
+
+        // ===== Menu / About =====
+        function toggleMenu() {
+            const overlay = document.getElementById("menu-overlay");
+            const toggle  = document.getElementById("menu-toggle");
+            const open = overlay.classList.toggle("show");
+            toggle.classList.toggle("active", open);
+            toggle.setAttribute("aria-label", open ? "Close menu" : "Open menu");
+        }
+
+        function showAbout() {
+            document.getElementById("menu-overlay").classList.remove("show");
+            document.getElementById("menu-toggle").classList.remove("active");
+            document.getElementById("about-overlay").classList.add("show");
+        }
+
+        function hideAbout() {
+            document.getElementById("about-overlay").classList.remove("show");
+        }
+
+        document.addEventListener("keydown", e => {
+            if (e.key !== "Escape") return;
+            document.getElementById("menu-overlay").classList.remove("show");
+            document.getElementById("menu-toggle").classList.remove("active");
+            hideAbout();
+        });
+    </script>
+</body>
+</html>
